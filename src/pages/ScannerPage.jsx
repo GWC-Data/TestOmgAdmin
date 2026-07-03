@@ -135,7 +135,7 @@ const ScannerPage = ({ onVerify, onConfirmVerification, onCancelVerification, sc
         </p>
       </div>
 
-      <div className="relative w-full max-w-sm aspect-square bg-gray-900 rounded-3xl overflow-hidden shadow-2xl select-none">
+      <div className="relative w-full max-w-sm bg-gray-900 rounded-3xl overflow-hidden shadow-2xl select-none">
         <div id={SCANNER_ELEMENT_ID} className="absolute inset-0 [&>video]:w-full [&>video]:h-full [&>video]:object-cover" />
 
         {!scanning && !error && (
