@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Global ───────────────────────────────────────────── */
+* { font-family: 'Nunito', sans-serif; }
+body { background: #eef0f8; min-height: 100vh; margin: 0; }
+#root { min-height: 100vh; }
+
+/* ── Scanner laser beam ───────────────────────────────── */
+@keyframes scanBeam {
+  0%,100% { top: 4%; }
+  50%      { top: 85%; }
+}
+.scanner-laser {
+  position: absolute; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(153,46,81,0.8), #ff6b9d, rgba(153,46,81,0.8), transparent);
+  box-shadow: 0 0 12px 4px rgba(153,46,81,0.5);
+  animation: scanBeam 2.5s ease-in-out infinite;
+}
+
+/* ── Scanner corner brackets ──────────────────────────── */
+.sc-corner {
+  position: absolute; width: 30px; height: 30px;
+  border-color: #293088; border-style: solid;
+}
+.sc-tl { top:0;    left:0;  border-width:4px 0 0 4px; border-radius:8px 0 0 0; }
+.sc-tr { top:0;    right:0; border-width:4px 4px 0 0; border-radius:0 8px 0 0; }
+.sc-bl { bottom:0; left:0;  border-width:0 0 4px 4px; border-radius:0 0 0 8px; }
+.sc-br { bottom:0; right:0; border-width:0 4px 4px 0; border-radius:0 0 8px 0; }
+
+/* ── Pulse ring (scanner icon) ────────────────────────── */
+@keyframes pulseRing {
+  0%       { transform: scale(1);    opacity: 0.7; }
+  70%,100% { transform: scale(1.65); opacity: 0;   }
+}
+.pulse-ring { position: relative; display: inline-flex; align-items: center; justify-content: center; }
+.pulse-ring::after {
+  content: ''; position: absolute; inset: -12px; border-radius: 50%;
+  border: 2px solid #293088; animation: pulseRing 2s ease-out infinite;
+}
+
+/* ── Page tab content fade-in ─────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.tab-enter { animation: fadeUp 0.3s ease forwards; }
+
+/* ── KPI card gradients ───────────────────────────────── */
+.kpi-1 { background: linear-gradient(135deg, #293088, #1c2566); }
+.kpi-2 { background: linear-gradient(135deg, #992e51, #7a2541); }
+.kpi-3 { background: linear-gradient(135deg, #3b43b0, #293088); }
+.kpi-4 { background: linear-gradient(135deg, #bf4070, #992e51); }
+
+/* ── Bottom nav active pip ────────────────────────────── */
+.bnav-pip {
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 32px; height: 3px; background: #293088; border-radius: 0 0 6px 6px;
+}
+
+/* ── Scrollbar hide ───────────────────────────────────── */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ── Card hover lift ──────────────────────────────────── */
+.card-lift { transition: transform 0.22s ease, box-shadow 0.22s ease; }
+.card-lift:hover { transform: translateY(-4px); box-shadow: 0 14px 40px rgba(41,48,136,0.18); }
+
+/* ── Shimmer on KPI cards ─────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+.kpi-shimmer {
+  background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.04) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 2.8s infinite;
+}
