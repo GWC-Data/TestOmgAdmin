@@ -1,37 +1,14 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import TopNav           from './components/layout/TopNav'
 import BottomNav        from './components/layout/BottomNav'
 import ScannerPage       from './pages/ScannerPage'
 import RegistrationsPage from './pages/RegistrationsPage'
 import DonationsPage     from './pages/DonationsPage'
-import LoginPage         from './pages/LoginPage'
 import ScanResultModal   from './components/ui/ScanResultModal'
 import { templeClient }  from './api/axiosClient'
 
 export default function App() {
-  const [user, setUser] = useState(null)
   const [activeTab, setActiveTab] = useState('scanner')
-  const [checkingAuth, setCheckingAuth] = useState(true)
-
-  // Check auth state on load
-  useEffect(() => {
-    const token = localStorage.getItem('accessToken')
-    const storedUser = localStorage.getItem('user')
-    if (token && storedUser) {
-      try {
-        setUser(JSON.parse(storedUser))
-      } catch (err) {
-        localStorage.removeItem('accessToken')
-        localStorage.removeItem('user')
-      }
-    }
-    setCheckingAuth(false)
-  }, [])
-
-  const handleLoginSuccess = (authenticatedUser) => {
-    setUser(authenticatedUser)
-  }
-
   const [scanResult, setScanResult] = useState(null)
 
   // Verification helper for live scanning
@@ -119,18 +96,6 @@ export default function App() {
     }
   }
 
-  if (checkingAuth) {
-    return (
-      <div className="min-h-screen bg-[#eef0f8] flex items-center justify-center">
-        <span className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
-  }
-
-  if (!user) {
-    return <LoginPage onLoginSuccess={handleLoginSuccess} />
-  }
-
   return (
     <div className="font-nunito min-h-screen bg-[#eef0f8] flex flex-col relative">
       <TopNav active={activeTab} onChange={setActiveTab} />
@@ -143,7 +108,7 @@ export default function App() {
 
       <BottomNav active={activeTab} onChange={setActiveTab} />
 
-      {/* Render Scan Result Modal at root level to overlap the bottom nav and body */}
+      {/* Render Scan Result Modal at root level to overlay the bottom nav and body */}
       {scanResult && (
         <ScanResultModal
           result={scanResult}
