@@ -33,7 +33,9 @@ const ScanResultModal = ({ result, onConfirm, onCancel }) => (
 
         {/* Title and Message */}
         <h2 className="text-lg font-extrabold text-gray-900 text-center mb-1">
-          {result.valid ? 'Verified' : 'Verification Failed'}
+          {result.valid 
+            ? 'Verified' 
+            : (result.message === 'already verified' ? 'Already Verified' : 'Verification Failed')}
         </h2>
         <p className="text-xs text-gray-500 text-center mb-4 px-2 leading-relaxed">
           {result.message}
@@ -60,11 +62,14 @@ const ScanResultModal = ({ result, onConfirm, onCancel }) => (
             Cancel
           </button>
           <button
-            onClick={onConfirm}
+            onClick={result.valid ? onConfirm : undefined}
+            disabled={!result.valid && result.message === 'already verified'}
             className={`flex-[2] py-3 rounded-xl font-bold text-xs text-white shadow-lg shadow-black/5 transition-transform hover:scale-[1.02] active:scale-[0.98]
-              ${result.valid ? 'bg-primary' : 'bg-red-500'}`}
+              ${result.valid ? 'bg-primary' : 'bg-red-500'} ${(!result.valid && result.message === 'already verified') ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            {result.valid ? 'Confirm Check-in' : 'Try Again'}
+            {result.valid 
+              ? 'Verify' 
+              : (result.message === 'already verified' ? 'Already Verified' : 'Try Again')}
           </button>
         </div>
       </div>

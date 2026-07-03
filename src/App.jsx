@@ -26,17 +26,17 @@ export default function App() {
 
       if (response.data && response.data.success) {
         const ticketData = response.data.data || {}
+        const isVerified = ticketData.isVerified === true || response.data.message === 'already verified';
         const result = {
-          valid: true,
-          message: ticketData.isVerified ? 'Already Verified!' : 'Ticket details loaded. Tap "Continue" to confirm check-in.',
+          valid: !isVerified, // Mark invalid if already verified so they can't confirm again or it shows warning
+          message: response.data.message || (isVerified ? 'already verified' : 'Ticket is valid. Press verify to check in.'),
           details: {
             'Name': ticketData.customerName || 'Guest Devotee',
             'Pooja/Event': ticketData.pooja || 'Registration',
             'Booking Details': ticketData.bookingDate || 'N/A',
             'Ticket ID': ticketData.refId || parsedToken,
-            'Scan Count': String(ticketData.scanCount ?? 0),
             'Status': ticketData.status || 'Active',
-            'Verified': ticketData.isVerified ? '✅ Yes' : '❌ No'
+            'Verified': isVerified ? '✅ Yes' : '❌ No'
           },
           token: parsedToken
         }
