@@ -1,12 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { HugeiconsIcon } from '@hugeicons/react'
 import {
   NoteEditIcon,
   UserGroupIcon,
   UserStar01Icon,
-  HourglassIcon,
-  CheckmarkCircle02Icon,
-  CancelCircleIcon
+  HourglassIcon
 } from '@hugeicons/core-free-icons'
 import KpiCard from '../components/ui/KpiCard'
 import DataTable from '../components/ui/DataTable'
@@ -24,6 +22,11 @@ const RegistrationsPage = () => {
   const [sortKey, setSortKey] = useState('createdAt')
   const [sortDir, setSortDir] = useState('desc')
 
+  // Filter States
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
+  const [timeSlotFilter, setTimeSlotFilter] = useState('')
+
   // Metrics
   const [metrics, setMetrics] = useState({
     totalRegistrations: 0,
@@ -37,9 +40,24 @@ const RegistrationsPage = () => {
     setError(null)
     try {
       const offset = (page - 1) * pageSize
-      const res = await templeClient.get('/admin/koozhu-thiruvizha', {
-        params: { limit: pageSize, offset }
-      })
+      
+      const [res, pendingRes] = await Promise.all([
+        templeClient.get('/admin/koozhu-thiruvizha', {
+          params: {
+            limit: pageSize,
+            offset,
+            search: search.trim() || undefined,
+            status: statusFilter || undefined,
+            time_slot: timeSlotFilter || undefined
+          }
+        }),
+        templeClient.get('/admin/koozhu-thiruvizha', {
+          params: {
+            limit: 1,
+            status: 'pending'
+          }
+        }).catch(() => null)
+      ])
 
       if (res.data?.success) {
         const list = res.data.data.list || []
@@ -47,11 +65,10 @@ const RegistrationsPage = () => {
         setRows(list)
         setTotal(totalCount)
 
-        // Compute metrics locally or from response if provided
         const totalRegs = totalCount
         const totalHead = list.reduce((sum, r) => sum + (r.headcount || 0), 0)
         const uniqueDevs = new Set(list.map((r) => r.mobile_number)).size
-        const pending = list.filter((r) => r.status === 'pending').length
+        const pending = pendingRes?.data?.data?.total ?? list.filter((r) => r.ticketVerification?.is_verified !== true && r.status !== 'completed' && r.status !== 'verified' && r.status !== 'cancelled').length
 
         setMetrics({
           totalRegistrations: totalRegs,
@@ -71,7 +88,13 @@ const RegistrationsPage = () => {
 
   useEffect(() => {
     fetchRegistrations()
-  }, [page, pageSize])
+  }, [page, pageSize, statusFilter, timeSlotFilter])
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault()
+    setPage(1)
+    fetchRegistrations()
+  }
 
   const handleSelectAll = (e) => {
     if (e.target.checked) {
@@ -100,6 +123,34 @@ const RegistrationsPage = () => {
     }
   }
 
+  const sortedRows = useMemo(() => {
+    const sorted = [...rows]
+    if (!sortKey) return sorted
+
+    sorted.sort((a, b) => {
+      let av = a[sortKey]
+      let bv = b[sortKey]
+
+      if (sortKey === 'time_slot_preference') {
+        av = a.time_slot_preference || ''
+        bv = b.time_slot_preference || ''
+      }
+
+      if (av == null) return 1
+      if (bv == null) return -1
+
+      if (typeof av === 'number' && typeof bv === 'number') {
+        return sortDir === 'asc' ? av - bv : bv - av
+      }
+
+      return sortDir === 'asc'
+        ? String(av).localeCompare(String(bv))
+        : String(bv).localeCompare(String(av))
+    })
+
+    return sorted
+  }, [rows, sortKey, sortDir])
+
   const columns = [
     {
       key: 'id',
@@ -110,7 +161,7 @@ const RegistrationsPage = () => {
     },
     { key: 'name', label: 'Devotee Name', defaultWidth: 200, minWidth: 150 },
     { key: 'mobile_number', label: 'Mobile Number', defaultWidth: 160, minWidth: 130 },
-    { key: 'headcount', label: 'Headcount', defaultWidth: 120, minWidth: 90, cellAlign: 'center' },
+    { key: 'headcount', label: 'Headcount', defaultWidth: 120, minWidth: 110, cellAlign: 'center' },
     { key: 'time_slot_preference', label: 'Timeslot', defaultWidth: 180, minWidth: 120 },
     {
       key: 'status',
@@ -118,31 +169,28 @@ const RegistrationsPage = () => {
       defaultWidth: 140,
       minWidth: 100,
       render: (row) => {
+        const isVerified = row.ticketVerification?.is_verified === true || row.status === 'completed' || row.status === 'verified'
+        const isCancelled = row.status === 'cancelled'
+        
         let badgeColor = 'bg-amber-100 text-amber-700' // pending
-        if (row.status === 'completed' || row.status === 'verified') badgeColor = 'bg-green-100 text-green-700'
-        if (row.status === 'cancelled') badgeColor = 'bg-red-100 text-red-700'
+        let statusLabel = 'pending'
+
+        if (isVerified) {
+          badgeColor = 'bg-green-100 text-green-700'
+          statusLabel = 'verified'
+        } else if (isCancelled) {
+          badgeColor = 'bg-red-100 text-red-700'
+          statusLabel = 'cancelled'
+        }
+
         return (
           <span className={`inline-flex px-2.5 py-1 rounded-lg text-xs font-black capitalize ${badgeColor}`}>
-            {row.status || 'pending'}
+            {statusLabel}
           </span>
         )
       }
     }
   ]
-
-  const actionColumn = {
-    label: 'Actions',
-    render: (row) => (
-      <div className="flex items-center justify-center gap-1.5">
-        <button className="p-1 text-gray-400 hover:text-primary transition-colors">
-          <HugeiconsIcon icon={CheckmarkCircle02Icon} size={16} color="currentColor" />
-        </button>
-        <button className="p-1 text-gray-400 hover:text-red-500 transition-colors">
-          <HugeiconsIcon icon={CancelCircleIcon} size={16} color="currentColor" />
-        </button>
-      </div>
-    )
-  }
 
   const kpis = [
     { title: 'Total Registrations', value: metrics.totalRegistrations.toLocaleString(), subtitle: 'All entries', icon: NoteEditIcon, gradientClass: 'kpi-1' },
@@ -177,18 +225,58 @@ const RegistrationsPage = () => {
         ))}
       </div>
 
-      {/* Recent Registrations Table */}
+      {/* Filter Toolbar & DataTable */}
       <div className="bg-white rounded-2xl shadow-card overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-          <h2 className="font-extrabold text-gray-800 text-base">Recent Registrations</h2>
+        {/* Responsive Toolbar */}
+        <div className="px-5 py-4 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <h2 className="font-extrabold text-gray-800 text-base shrink-0">Devotee Registrations</h2>
+          
+          <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 w-full md:w-auto">
+            {/* Search Input */}
+            <form onSubmit={handleSearchSubmit} className="relative w-full md:w-60">
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search name or phone..."
+                className="w-full pl-4 pr-10 py-2 rounded-xl border border-gray-200 text-xs font-semibold focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all bg-gray-50/50"
+              />
+              <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary text-sm">
+                🔍
+              </button>
+            </form>
+
+            {/* Selects Container */}
+            <div className="grid grid-cols-2 md:flex gap-2">
+              <select
+                value={statusFilter}
+                onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+                className="w-full md:w-auto px-3 py-2 rounded-xl border border-gray-200 text-xs font-semibold focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all bg-gray-50/50 cursor-pointer text-gray-600"
+              >
+                <option value="">All Statuses</option>
+                <option value="verified">Verified</option>
+                <option value="pending">Pending</option>
+              </select>
+
+              <select
+                value={timeSlotFilter}
+                onChange={(e) => { setTimeSlotFilter(e.target.value); setPage(1); }}
+                className="w-full md:w-auto px-3 py-2 rounded-xl border border-gray-200 text-xs font-semibold focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all bg-gray-50/50 cursor-pointer text-gray-600"
+              >
+                <option value="">All Timeslots</option>
+                <option value="morning">Morning</option>
+                <option value="afternoon">Afternoon</option>
+                <option value="evening">Evening</option>
+              </select>
+            </div>
+          </div>
         </div>
 
-        {/* DataTable view shown on all screen sizes */}
+        {/* DataTable view */}
         <div>
           <DataTable
-            rows={rows}
+            rows={sortedRows}
             columns={columns}
-            actionColumn={actionColumn}
             loading={loading}
             error={error}
             page={page}

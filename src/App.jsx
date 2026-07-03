@@ -3,7 +3,6 @@ import TopNav           from './components/layout/TopNav'
 import BottomNav        from './components/layout/BottomNav'
 import ScannerPage       from './pages/ScannerPage'
 import RegistrationsPage from './pages/RegistrationsPage'
-import DonationsPage     from './pages/DonationsPage'
 import ScanResultModal   from './components/ui/ScanResultModal'
 import { templeClient }  from './api/axiosClient'
 
@@ -91,7 +90,6 @@ export default function App() {
           />
         )
       case 'registrations': return <RegistrationsPage />
-      case 'donations':     return <DonationsPage />
       default:              return <ScannerPage />
     }
   }

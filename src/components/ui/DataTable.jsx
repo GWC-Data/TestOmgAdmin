@@ -267,33 +267,37 @@ export default function DataTable({
         </table>
       </div>
 
-      <div className="flex items-center justify-between flex-wrap gap-3" style={{ borderTop: `1px solid ${BORDER}`, padding: '12px 20px', background: '#F8FAFC' }}>
-        <div className="flex items-center gap-3" style={{ fontSize: 13, color: '#475569' }}>
-          <div className="flex items-center gap-2">
-            <span>Rows:</span>
-            <select value={pageSize} onChange={(e) => { onPageSizeChange(Number(e.target.value)); onPageChange(1); }} style={{ border: '1px solid #D1D5DB', borderRadius: 6, padding: '4px 8px', fontSize: 13, color: '#0F172A', background: '#FFFFFF', cursor: 'pointer' }}>
+      <div className="flex flex-row items-center justify-between gap-2 border-t border-gray-100 px-4 py-3 bg-[#F8FAFC]">
+        {/* Left side: Rows selector and stats */}
+        <div className="flex items-center gap-1.5 sm:gap-3 text-xs text-gray-500 font-medium shrink-0">
+          <div className="flex items-center gap-1">
+            <span className="hidden sm:inline">Rows:</span>
+            <select value={pageSize} onChange={(e) => { onPageSizeChange(Number(e.target.value)); onPageChange(1); }} style={{ border: '1px solid #D1D5DB', borderRadius: 6, padding: '2px 4px', fontSize: 11, color: '#0F172A', background: '#FFFFFF', cursor: 'pointer' }}>
               {pageSizeOptions.map((n) => <option key={n} value={n}>{n}</option>)}
             </select>
           </div>
-          <span style={{ color: '#94A3B8' }}>|</span>
-          <span>{rangeStart}–{rangeEnd} of <strong>{total.toLocaleString()}</strong></span>
+          <span className="text-gray-300">|</span>
+          <span className="text-[11px] sm:text-xs">{rangeStart}–{rangeEnd} of <strong className="text-gray-700">{total}</strong></span>
         </div>
 
-        <div className="flex items-center gap-1">
+        {/* Right side: Page navigation */}
+        <div className="flex items-center gap-1 text-xs text-gray-500 font-medium">
           <button className="dt-btn-desktop" onClick={() => onPageChange(1)} disabled={page <= 1 || loading} style={iconBtnStyle(page <= 1 || loading)} aria-label="First page">
-            <HugeiconsIcon icon={ChevronsLeftIcon} size={15} color="currentColor" />
+            <HugeiconsIcon icon={ChevronsLeftIcon} size={13} color="currentColor" />
           </button>
           <button onClick={() => onPageChange(Math.max(1, page - 1))} disabled={page <= 1 || loading} style={iconBtnStyle(page <= 1 || loading)} aria-label="Previous page">
-            <HugeiconsIcon icon={ChevronLeftIcon} size={15} color="currentColor" />
+            <HugeiconsIcon icon={ChevronLeftIcon} size={13} color="currentColor" />
           </button>
-          <span style={{ fontSize: 13, color: '#475569', marginLeft: 6 }}>Page</span>
-          <input type="number" value={page} min={1} max={pageCount} onChange={(e) => { const v = Math.min(pageCount, Math.max(1, Number(e.target.value) || 1)); onPageChange(v); }} style={{ width: 44, border: '1px solid #D1D5DB', borderRadius: 6, padding: '4px 4px', fontSize: 13, textAlign: 'center', background: '#FFFFFF' }} />
-          <span style={{ fontSize: 13, color: '#475569' }}>of <strong>{pageCount}</strong></span>
-          <button onClick={() => onPageChange(Math.min(pageCount, page + 1))} disabled={page >= pageCount || loading} style={iconBtnStyle(page >= pageCount || loading)} aria-label="Next page" className="ml-1">
-            <HugeiconsIcon icon={ChevronRightIcon} size={15} color="currentColor" />
+          
+          <span className="text-[11px] sm:text-xs">Page</span>
+          <input type="number" value={page} min={1} max={pageCount} onChange={(e) => { const v = Math.min(pageCount, Math.max(1, Number(e.target.value) || 1)); onPageChange(v); }} style={{ width: 34, border: '1px solid #D1D5DB', borderRadius: 6, padding: '2px 0', fontSize: 11, textAlign: 'center', background: '#FFFFFF' }} />
+          <span className="text-[11px] sm:text-xs">of <strong>{pageCount}</strong></span>
+          
+          <button onClick={() => onPageChange(Math.min(pageCount, page + 1))} disabled={page >= pageCount || loading} style={iconBtnStyle(page >= pageCount || loading)} aria-label="Next page">
+            <HugeiconsIcon icon={ChevronRightIcon} size={13} color="currentColor" />
           </button>
           <button className="dt-btn-desktop" onClick={() => onPageChange(pageCount)} disabled={page >= pageCount || loading} style={iconBtnStyle(page >= pageCount || loading)} aria-label="Last page">
-            <HugeiconsIcon icon={ChevronsRightIcon} size={15} color="currentColor" />
+            <HugeiconsIcon icon={ChevronsRightIcon} size={13} color="currentColor" />
           </button>
         </div>
       </div>

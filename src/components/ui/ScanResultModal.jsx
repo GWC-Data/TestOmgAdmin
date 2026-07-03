@@ -2,8 +2,8 @@ import { HugeiconsIcon } from '@hugeicons/react'
 import { Tick01Icon, Cancel01Icon } from '@hugeicons/core-free-icons'
 
 const ScanResultModal = ({ result, onConfirm, onCancel }) => (
-  <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45 backdrop-blur-sm overflow-y-auto">
-    <div className="w-full max-w-sm my-auto rounded-3xl bg-white shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200 flex flex-col max-h-[90vh]">
+  <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div className="w-full max-w-sm rounded-3xl bg-white shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200 flex flex-col max-h-[85vh]">
       
       {/* Visual Status Indicator */}
       <div className={`h-1.5 w-full shrink-0 ${result.valid ? 'bg-primary' : 'bg-red-500'}`} />
