@@ -4,7 +4,15 @@ import {
   NoteEditIcon,
   UserGroupIcon,
   UserStar01Icon,
-  HourglassIcon
+  HourglassIcon,
+  LicenseIcon,
+  UserIcon,
+  SmartPhone01Icon,
+  Calendar02Icon,
+  CheckmarkCircle02Icon,
+  Search01Icon,
+  RefreshIcon,
+  FilterIcon
 } from '@hugeicons/core-free-icons'
 import KpiCard from '../components/ui/KpiCard'
 import DataTable from '../components/ui/DataTable'
@@ -157,17 +165,44 @@ const RegistrationsPage = () => {
       label: 'ID',
       defaultWidth: 100,
       minWidth: 80,
+      icon: <HugeiconsIcon icon={LicenseIcon} size={13} color="currentColor" />,
       render: (row) => <span className="font-mono text-xs">{row.id?.substring(0, 8) || row.id}</span>
     },
-    { key: 'name', label: 'Devotee Name', defaultWidth: 200, minWidth: 150 },
-    { key: 'mobile_number', label: 'Mobile Number', defaultWidth: 160, minWidth: 130 },
-    { key: 'headcount', label: 'Headcount', defaultWidth: 120, minWidth: 110, cellAlign: 'center' },
-    { key: 'time_slot_preference', label: 'Timeslot', defaultWidth: 180, minWidth: 120 },
+    { 
+      key: 'name', 
+      label: 'Devotee Name', 
+      defaultWidth: 200, 
+      minWidth: 150,
+      icon: <HugeiconsIcon icon={UserIcon} size={13} color="currentColor" />
+    },
+    { 
+      key: 'mobile_number', 
+      label: 'Mobile Number', 
+      defaultWidth: 160, 
+      minWidth: 130,
+      icon: <HugeiconsIcon icon={SmartPhone01Icon} size={13} color="currentColor" />
+    },
+    { 
+      key: 'headcount', 
+      label: 'Headcount', 
+      defaultWidth: 120, 
+      minWidth: 120, 
+      cellAlign: 'center',
+      icon: <HugeiconsIcon icon={UserGroupIcon} size={13} color="currentColor" />
+    },
+    { 
+      key: 'time_slot_preference', 
+      label: 'Timeslot', 
+      defaultWidth: 180, 
+      minWidth: 120,
+      icon: <HugeiconsIcon icon={Calendar02Icon} size={13} color="currentColor" />
+    },
     {
       key: 'status',
       label: 'Status',
       defaultWidth: 140,
       minWidth: 100,
+      icon: <HugeiconsIcon icon={CheckmarkCircle02Icon} size={13} color="currentColor" />,
       render: (row) => {
         const isVerified = row.ticketVerification?.is_verified === true || row.status === 'completed' || row.status === 'verified'
         const isCancelled = row.status === 'cancelled'
@@ -200,20 +235,27 @@ const RegistrationsPage = () => {
   ]
 
   return (
-    <div className="tab-enter px-4 pb-6 max-w-5xl mx-auto w-full">
+    <div className="tab-enter px-4 sm:px-6 lg:px-8 pb-6 max-w-7xl mx-auto w-full">
       {/* Header */}
       <div className="mt-6 mb-5">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-extrabold text-primary">Registrations</h1>
-            <p className="text-gray-400 text-sm font-medium mt-0.5">Overview of all devotee registrations</p>
+          <div className="flex items-center gap-3">
+            <img 
+              src="https://omgofficial.com/omg-logo.png" 
+              alt="OMG Logo" 
+              className="md:hidden h-8 w-auto object-contain" 
+            />
+            <div>
+              <h1 className="text-2xl font-extrabold text-primary">Registrations</h1>
+              <p className="text-gray-400 text-sm font-medium mt-0.5">Overview of all devotee registrations</p>
+            </div>
           </div>
           <button
             onClick={fetchRegistrations}
-            className="p-2.5 bg-white border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 transition-colors"
+            className="p-2.5 bg-white border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 transition-colors flex items-center justify-center"
             title="Refresh Data"
           >
-            🔄
+            <HugeiconsIcon icon={RefreshIcon} size={16} />
           </button>
         </div>
       </div>
@@ -241,33 +283,47 @@ const RegistrationsPage = () => {
                 placeholder="Search name or phone..."
                 className="w-full pl-4 pr-10 py-2 rounded-xl border border-gray-200 text-xs font-semibold focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all bg-gray-50/50"
               />
-              <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary text-sm">
-                🔍
+              <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary flex items-center">
+                <HugeiconsIcon icon={Search01Icon} size={15} />
               </button>
             </form>
 
             {/* Selects Container */}
             <div className="grid grid-cols-2 md:flex gap-2">
-              <select
-                value={statusFilter}
-                onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-                className="w-full md:w-auto px-3 py-2 rounded-xl border border-gray-200 text-xs font-semibold focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all bg-gray-50/50 cursor-pointer text-gray-600"
-              >
-                <option value="">All Statuses</option>
-                <option value="verified">Verified</option>
-                <option value="pending">Pending</option>
-              </select>
+              <div className="relative w-full md:w-auto">
+                <HugeiconsIcon 
+                  icon={FilterIcon} 
+                  size={14} 
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" 
+                />
+                <select
+                  value={statusFilter}
+                  onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+                  className="w-full md:w-auto pl-9 pr-8 py-2 rounded-xl border border-gray-200 text-xs font-semibold focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all bg-gray-50/50 cursor-pointer text-gray-600 appearance-none"
+                >
+                  <option value="">All Statuses</option>
+                  <option value="verified">Verified</option>
+                  <option value="pending">Pending</option>
+                </select>
+              </div>
 
-              <select
-                value={timeSlotFilter}
-                onChange={(e) => { setTimeSlotFilter(e.target.value); setPage(1); }}
-                className="w-full md:w-auto px-3 py-2 rounded-xl border border-gray-200 text-xs font-semibold focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all bg-gray-50/50 cursor-pointer text-gray-600"
-              >
-                <option value="">All Timeslots</option>
-                <option value="morning">Morning</option>
-                <option value="afternoon">Afternoon</option>
-                <option value="evening">Evening</option>
-              </select>
+              <div className="relative w-full md:w-auto">
+                <HugeiconsIcon 
+                  icon={Calendar02Icon} 
+                  size={14} 
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" 
+                />
+                <select
+                  value={timeSlotFilter}
+                  onChange={(e) => { setTimeSlotFilter(e.target.value); setPage(1); }}
+                  className="w-full md:w-auto pl-9 pr-8 py-2 rounded-xl border border-gray-200 text-xs font-semibold focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all bg-gray-50/50 cursor-pointer text-gray-600 appearance-none"
+                >
+                  <option value="">All Timeslots</option>
+                  <option value="morning">Morning</option>
+                  <option value="afternoon">Afternoon</option>
+                  <option value="evening">Evening</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>

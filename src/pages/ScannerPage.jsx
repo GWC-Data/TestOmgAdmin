@@ -128,11 +128,18 @@ const ScannerPage = ({ onVerify, onConfirmVerification, onCancelVerification, sc
 
   return (
     <div className="tab-enter flex flex-col items-center px-4 pb-6">
-      <div className="w-full max-w-sm mt-6 mb-4">
-        <h1 className="text-2xl font-extrabold text-primary">Scan Entry</h1>
-        <p className="text-gray-400 text-sm font-medium mt-0.5">
-          Point camera at the QR / barcode
-        </p>
+      <div className="w-full max-w-sm mt-6 mb-4 flex items-center gap-3">
+        <img 
+          src="https://omgofficial.com/omg-logo.png" 
+          alt="OMG Logo" 
+          className="md:hidden h-8 w-auto object-contain" 
+        />
+        <div>
+          <h1 className="text-2xl font-extrabold text-primary">Scan Entry</h1>
+          <p className="text-gray-400 text-sm font-medium mt-0.5">
+            Point camera at the QR / barcode
+          </p>
+        </div>
       </div>
 
       <div className="relative w-full max-w-sm bg-gray-900 rounded-3xl overflow-hidden shadow-2xl select-none">

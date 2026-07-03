@@ -3,12 +3,14 @@ import { TABS } from '../../constants/tabs'
 
 const TopNav = ({ active, onChange }) => (
   <header className="hidden md:flex sticky top-0 z-40 w-full bg-white/80 backdrop-blur-lg border-b border-primary/10 shadow-sm">
-    <div className="max-w-5xl mx-auto w-full flex items-center px-6 h-16 gap-2">
+    <div className="max-w-7xl mx-auto w-full flex items-center px-4 sm:px-6 lg:px-8 h-16 gap-2">
       {/* Logo */}
       <div className="flex items-center gap-2 mr-8">
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary-variant flex items-center justify-center text-white font-black text-sm">
-          OM
-        </div>
+        <img 
+          src="https://omgofficial.com/omg-logo.png" 
+          alt="OMG Logo" 
+          className="h-8 w-auto object-contain" 
+        />
         <span className="font-black text-primary text-lg tracking-tight">OMG Temple</span>
       </div>
 
