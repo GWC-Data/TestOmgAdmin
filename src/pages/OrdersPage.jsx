@@ -74,8 +74,24 @@ const OrdersPage = () => {
     { key: 'mobile_number', label: 'Mobile Number', defaultWidth: 150 },
     { key: 'items', label: 'Items Purchased', defaultWidth: 350 },
     { key: 'total_price', label: 'Total Price', defaultWidth: 120 },
-    { key: 'status', label: 'Status', defaultWidth: 120 },
+    {
+      key: 'status',
+      label: 'Status',
+      defaultWidth: 120,
+      render: (row) => (
+        <span
+          className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+            row.status === 'COMPLETED'
+              ? 'bg-green-50 text-green-700 border border-green-200'
+              : 'bg-yellow-50 text-yellow-700 border border-yellow-200'
+          }`}
+        >
+          {row.status}
+        </span>
+      )
+    },
   ]
+
 
 
   const formattedRows = rows.map((row) => {
@@ -116,16 +132,9 @@ const OrdersPage = () => {
       {/* Header */}
       <div className="mt-6 mb-5">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img 
-              src="https://omgofficial.com/omg-logo.png" 
-              alt="OMG Logo" 
-              className="h-8 w-auto object-contain" 
-            />
-            <div>
-              <h1 className="text-2xl font-extrabold text-primary">Store Orders</h1>
-              <p className="text-gray-400 text-sm font-medium mt-0.5">Manage and review WhatsApp Store checkouts.</p>
-            </div>
+          <div>
+            <h1 className="text-2xl font-extrabold text-primary">Store Orders</h1>
+            <p className="text-gray-400 text-sm font-medium mt-0.5">Manage and review WhatsApp Store checkouts.</p>
           </div>
           <button
             onClick={fetchOrders}

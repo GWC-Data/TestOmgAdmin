@@ -85,16 +85,9 @@ const DonationsPage = () => {
       {/* Header */}
       <div className="mt-6 mb-5">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img 
-              src="https://omgofficial.com/omg-logo.png" 
-              alt="OMG Logo" 
-              className="h-8 w-auto object-contain" 
-            />
-            <div>
-              <h1 className="text-2xl font-extrabold text-primary">Donations & Pledges</h1>
-              <p className="text-gray-400 text-sm font-medium mt-0.5">Manage and review WhatsApp donations and pledges.</p>
-            </div>
+          <div>
+            <h1 className="text-2xl font-extrabold text-primary">Donations & Pledges</h1>
+            <p className="text-gray-400 text-sm font-medium mt-0.5">Manage and review WhatsApp donations and pledges.</p>
           </div>
           <button
             onClick={fetchDonations}
