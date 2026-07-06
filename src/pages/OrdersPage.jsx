@@ -112,20 +112,10 @@ const OrdersPage = () => {
       ...row,
       createdAt: new Date(row.createdAt).toLocaleString(),
       name: row.name || 'Guest Devotee',
-      items: itemsStr,
-      status: (
-        <span
-          className={`px-2.5 py-1 rounded-full text-xs font-bold ${
-            row.status === 'COMPLETED'
-              ? 'bg-green-50 text-green-700 border border-green-200'
-              : 'bg-yellow-50 text-yellow-700 border border-yellow-200'
-          }`}
-        >
-          {row.status}
-        </span>
-      )
+      items: itemsStr
     }
   })
+
 
   return (
     <div className="tab-enter px-4 sm:px-6 lg:px-8 pb-6 max-w-7xl mx-auto w-full">
