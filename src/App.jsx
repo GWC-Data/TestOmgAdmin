@@ -3,8 +3,11 @@ import TopNav           from './components/layout/TopNav'
 import BottomNav        from './components/layout/BottomNav'
 import ScannerPage       from './pages/ScannerPage'
 import RegistrationsPage from './pages/RegistrationsPage'
+import OrdersPage        from './pages/OrdersPage'
+import DonationsPage     from './pages/DonationsPage'
 import ScanResultModal   from './components/ui/ScanResultModal'
 import { templeClient }  from './api/axiosClient'
+
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('scanner')
@@ -90,9 +93,12 @@ export default function App() {
           />
         )
       case 'registrations': return <RegistrationsPage />
+      case 'orders':        return <OrdersPage />
+      case 'donations':     return <DonationsPage />
       default:              return <ScannerPage />
     }
   }
+
 
   return (
     <div className="font-nunito min-h-screen bg-[#eef0f8] flex flex-col relative">
