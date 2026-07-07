@@ -10,6 +10,8 @@ import {
 
 import KpiCard from '../components/ui/KpiCard'
 import DataTable from '../components/ui/DataTable'
+import Toast from '../components/ui/Toast'
+import Dialog from '../components/ui/Dialog'
 import { templeClient } from '../api/axiosClient'
 
 const DonationsPage = () => {
@@ -33,6 +35,16 @@ const DonationsPage = () => {
   // Auto-suggestions states
   const [suggestions, setSuggestions] = useState({ names: [], mobiles: [] })
   const [showSuggestions, setShowSuggestions] = useState(false)
+
+  // Toast State
+  const [toast, setToast] = useState(null)
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type })
+    setTimeout(() => setToast(null), 3000)
+  }
+
+  // Dialog State
+  const [dialogConfig, setDialogConfig] = useState(null)
 
   // Metrics
   const [metrics, setMetrics] = useState({
@@ -140,13 +152,108 @@ const DonationsPage = () => {
     fetchDonations()
   }, [page, pageSize, startDate, endDate, donationType, dateRangePreset])
 
-  // Updated Column Order: Name -> Donation Detail -> Date -> Time -> Mobile
+  const handleSendPaymentLink = (id) => {
+    setDialogConfig({
+      type: 'prompt',
+      title: 'Send Payment Link',
+      message: 'Enter Razorpay / Payment Link (Optional):',
+      defaultValue: 'https://rzp.io/l/donation',
+      onConfirm: async (link) => {
+        try {
+          const res = await templeClient.post(`/admin/donations-pledges/${id}/send-payment-link`, {
+            paymentLink: link
+          })
+          if (res.data?.success) {
+            showToast("Payment link sent successfully via WhatsApp!")
+          } else {
+            showToast("Failed to send payment link.", "error")
+          }
+        } catch (err) {
+          console.error(err)
+          showToast("Error sending payment link.", "error")
+        }
+      }
+    })
+  }
+
+  const handleMarkAsPaid = (id) => {
+    setDialogConfig({
+      type: 'confirm',
+      title: 'Mark as Paid',
+      message: 'Are you sure you want to mark this donation as completed/paid?',
+      onConfirm: async () => {
+        try {
+          const res = await templeClient.patch(`/admin/donations-pledges/${id}`, {
+            status: 'COMPLETED'
+          })
+          if (res.data?.success) {
+            showToast("Status updated to COMPLETED!")
+            fetchDonations() // refresh list
+          } else {
+            showToast("Failed to update status.", "error")
+          }
+        } catch (err) {
+          console.error(err)
+          showToast("Error updating status.", "error")
+        }
+      }
+    })
+  }
+
+  // Updated Column Order: Name -> Donation Detail -> Date -> Time -> Mobile -> Status -> Actions
   const columns = [
-    { key: 'name', label: 'Donor Name', defaultWidth: 200 },
-    { key: 'type_of_donation', label: 'Donation Detail', defaultWidth: 300 },
+    { key: 'name', label: 'Donor Name', defaultWidth: 150 },
+    { key: 'type_of_donation', label: 'Donation Detail', defaultWidth: 200 },
     { key: 'date', label: 'Date', defaultWidth: 120 },
     { key: 'time', label: 'Time', defaultWidth: 100 },
-    { key: 'mobile_number', label: 'Mobile Number', defaultWidth: 180 },
+    { key: 'mobile_number', label: 'Mobile Number', defaultWidth: 150 },
+    {
+      key: 'status',
+      label: 'Status',
+      defaultWidth: 120,
+      render: (row) => (
+        <span
+          className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+            row.status === 'COMPLETED'
+              ? 'bg-green-50 text-green-700 border border-green-200'
+              : 'bg-yellow-50 text-yellow-700 border border-yellow-200'
+          }`}
+        >
+          {row.status || 'PENDING'}
+        </span>
+      )
+    },
+    {
+      key: 'actions',
+      label: 'Actions',
+      defaultWidth: 220,
+      render: (row) => {
+        const isCompleted = (row.status || 'PENDING') === 'COMPLETED';
+        if (isCompleted) {
+          return (
+            <span className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-green-700 bg-green-50 border border-green-200 rounded-lg select-none cursor-default">
+              Payment Paid ✓
+            </span>
+          );
+        }
+        return (
+          <div className="flex gap-2">
+            <button
+              onClick={() => handleSendPaymentLink(row.id)}
+              className="px-2.5 py-1.5 bg-primary text-white text-[10px] font-bold rounded-lg hover:bg-primary-dark transition-all"
+            >
+              Send Pay Link
+            </button>
+            <button
+              onClick={() => handleMarkAsPaid(row.id)}
+              className="px-2.5 py-1.5 bg-green-600 text-white text-[10px] font-bold rounded-lg hover:bg-green-700 transition-all"
+            >
+              Mark Paid
+            </button>
+          </div>
+        );
+      }
+    }
   ]
 
   const formattedRows = rows.map((row) => {
@@ -364,6 +471,26 @@ const DonationsPage = () => {
           />
         </div>
       </div>
+
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+
+      {dialogConfig && (
+        <Dialog
+          isOpen={!!dialogConfig}
+          type={dialogConfig.type}
+          title={dialogConfig.title}
+          message={dialogConfig.message}
+          defaultValue={dialogConfig.defaultValue}
+          onConfirm={dialogConfig.onConfirm}
+          onClose={() => setDialogConfig(null)}
+        />
+      )}
     </div>
   )
 }
