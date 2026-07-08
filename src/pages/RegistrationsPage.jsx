@@ -160,49 +160,43 @@ const RegistrationsPage = () => {
   }, [rows, sortKey, sortDir])
 
   const columns = [
-    {
-      key: 'id',
+    { 
+      key: 'id', 
       label: 'ID',
       defaultWidth: 100,
       minWidth: 80,
-      icon: <HugeiconsIcon icon={LicenseIcon} size={13} color="currentColor" />,
       render: (row) => <span className="font-mono text-xs">{row.id?.substring(0, 8) || row.id}</span>
     },
     { 
       key: 'name', 
       label: 'Devotee Name', 
       defaultWidth: 200, 
-      minWidth: 150,
-      icon: <HugeiconsIcon icon={UserIcon} size={13} color="currentColor" />
+      minWidth: 150
     },
     { 
       key: 'mobile_number', 
       label: 'Mobile Number', 
       defaultWidth: 160, 
-      minWidth: 130,
-      icon: <HugeiconsIcon icon={SmartPhone01Icon} size={13} color="currentColor" />
+      minWidth: 130
     },
     { 
       key: 'headcount', 
       label: 'Headcount', 
       defaultWidth: 120, 
       minWidth: 120, 
-      cellAlign: 'center',
-      icon: <HugeiconsIcon icon={UserGroupIcon} size={13} color="currentColor" />
+      cellAlign: 'center'
     },
     { 
       key: 'time_slot_preference', 
       label: 'Timeslot', 
       defaultWidth: 180, 
-      minWidth: 120,
-      icon: <HugeiconsIcon icon={Calendar02Icon} size={13} color="currentColor" />
+      minWidth: 120
     },
     {
       key: 'status',
       label: 'Status',
       defaultWidth: 140,
       minWidth: 100,
-      icon: <HugeiconsIcon icon={CheckmarkCircle02Icon} size={13} color="currentColor" />,
       render: (row) => {
         const isVerified = row.ticketVerification?.is_verified === true || row.status === 'completed' || row.status === 'verified'
         const isCancelled = row.status === 'cancelled'

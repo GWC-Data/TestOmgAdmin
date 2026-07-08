@@ -50,16 +50,32 @@ export default function DataTable({
   selected,
   onSelectAll,
   onSelectOne,
+  showCheckbox = false,
 }) {
+  const [expandedRows, setExpandedRows] = useState(new Set());
+
+  const toggleRowExpanded = (rowKey) => {
+    setExpandedRows((prev) => {
+      const next = new Set(prev);
+      if (next.has(rowKey)) {
+        next.delete(rowKey);
+      } else {
+        next.add(rowKey);
+      }
+      return next;
+    });
+  };
+
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
   const rangeStart = total === 0 ? 0 : (page - 1) * pageSize + 1;
   const rangeEnd = Math.min(page * pageSize, total);
   const allOnPageSelected =
-    rows.length > 0 && rows.every((r, i) => selected.has(getRowKey(r, i)));
+    showCheckbox && rows.length > 0 && rows.every((r, i) => selected?.has(getRowKey(r, i)));
 
   // ── Resizable columns ──────────────────────────────────────────────────────
   const [colWidths, setColWidths] = useState(() => {
-    const w = { __checkbox: 40 };
+    const w = {};
+    if (showCheckbox) w.__checkbox = 40;
     columns.forEach((c) => { w[c.key] = c.defaultWidth; });
     if (actionColumn) w['__action'] = 96;
     return w;
@@ -105,18 +121,20 @@ export default function DataTable({
     </div>
   );
 
-  const cellStyle = {
+  const getCellStyle = (col, isExpanded) => ({
     padding: '12px 14px',
     fontSize: 13,
     color: '#0f172a',
     fontWeight: 600,
     borderRight: `1px solid ${BORDER}`,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  };
+    textAlign: col.cellAlign ?? 'left',
+    overflow: isExpanded ? 'visible' : 'hidden',
+    textOverflow: isExpanded ? 'clip' : 'ellipsis',
+    whiteSpace: isExpanded ? 'normal' : 'nowrap',
+    wordBreak: isExpanded ? 'break-word' : 'normal',
+  });
 
-  const totalCols = 1 + columns.length + (actionColumn ? 1 : 0);
+  const totalCols = (showCheckbox ? 1 : 0) + columns.length + (actionColumn ? 1 : 0);
 
   return (
     <div
@@ -132,21 +150,23 @@ export default function DataTable({
           style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed', minWidth: 800 }}
         >
           <colgroup>
-            <col style={{ width: colWidths['__checkbox'] }} />
+            {showCheckbox && <col style={{ width: colWidths['__checkbox'] }} />}
             {columns.map((c) => <col key={c.key} style={{ width: colWidths[c.key] }} />)}
             {actionColumn && <col style={{ width: colWidths['__action'] }} />}
           </colgroup>
 
           <thead>
             <tr style={{ background: '#F8FAFC', borderBottom: `2px solid ${BORDER}` }}>
-              <th style={{ padding: '12px 8px', textAlign: 'center', borderRight: `1px solid ${BORDER}` }}>
-                <input
-                  type="checkbox"
-                  checked={allOnPageSelected}
-                  onChange={onSelectAll}
-                  style={{ width: 15, height: 15, cursor: 'pointer' }}
-                />
-              </th>
+              {showCheckbox && (
+                <th style={{ padding: '12px 8px', textAlign: 'center', borderRight: `1px solid ${BORDER}` }}>
+                  <input
+                    type="checkbox"
+                    checked={allOnPageSelected}
+                    onChange={onSelectAll}
+                    style={{ width: 15, height: 15, cursor: 'pointer' }}
+                  />
+                </th>
+              )}
 
               {columns.map((col) => (
                 <th
@@ -210,9 +230,9 @@ export default function DataTable({
             {loading &&
               Array.from({ length: 8 }).map((_, i) => (
                 <tr key={`sk-${i}`} style={{ borderBottom: `1px solid ${BORDER}` }}>
-                  <td style={{ padding: '14px 8px', borderRight: `1px solid ${BORDER}` }} />
+                  {showCheckbox && <td style={{ padding: '14px 8px', borderRight: `1px solid ${BORDER}` }} />}
                   {columns.map((c) => (
-                    <td key={c.key} style={cellStyle}>
+                    <td key={c.key} style={getCellStyle(c, false)}>
                       <div style={{ height: 12, width: '70%', borderRadius: 4, background: '#F1F5F9', animation: 'dt-pulse 1.4s ease-in-out infinite' }} />
                     </td>
                   ))}
@@ -244,19 +264,28 @@ export default function DataTable({
 
             {!loading && !error && rows.map((row, i) => {
               const rowKey = getRowKey(row, i);
-              const isSelected = selected.has(rowKey);
+              const isSelected = showCheckbox && selected?.has(rowKey);
+              const isExpanded = expandedRows.has(rowKey);
               return (
                 <tr
                   key={rowKey}
-                  style={{ borderBottom: `1px solid ${BORDER}`, background: isSelected ? '#F0F9FF' : '#FFFFFF', transition: 'background 0.15s ease' }}
+                  onClick={(e) => {
+                    if (e.target.tagName === 'INPUT' || e.target.closest('button') || e.target.closest('a')) {
+                      return;
+                    }
+                    toggleRowExpanded(rowKey);
+                  }}
+                  style={{ borderBottom: `1px solid ${BORDER}`, background: isSelected ? '#F0F9FF' : '#FFFFFF', transition: 'background 0.15s ease', cursor: 'pointer' }}
                   onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = '#F8FAFC'; }}
                   onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = '#FFFFFF'; }}
                 >
-                  <td style={{ padding: '12px 8px', textAlign: 'center', borderRight: `1px solid ${BORDER}` }}>
-                    <input type="checkbox" checked={isSelected} onChange={() => onSelectOne(rowKey)} style={{ width: 15, height: 15, cursor: 'pointer' }} />
-                  </td>
+                  {showCheckbox && (
+                    <td style={{ padding: '12px 8px', textAlign: 'center', borderRight: `1px solid ${BORDER}` }}>
+                      <input type="checkbox" checked={isSelected} onChange={() => onSelectOne(rowKey)} style={{ width: 15, height: 15, cursor: 'pointer' }} />
+                    </td>
+                  )}
                   {columns.map((col) => (
-                    <td key={col.key} style={{ ...cellStyle, textAlign: col.cellAlign ?? 'left' }}>
+                    <td key={col.key} style={getCellStyle(col, isExpanded)}>
                       {col.render ? col.render(row, i) : String(row[col.key] ?? '—')}
                     </td>
                   ))}

@@ -13,6 +13,40 @@ import DataTable from '../components/ui/DataTable'
 import Toast from '../components/ui/Toast'
 import Dialog from '../components/ui/Dialog'
 import { templeClient } from '../api/axiosClient'
+const DONATION_TYPE_MAP = {
+  'grand_5001': 'Grand Patron ($5,001)',
+  'patron_1001': 'Patron ($1,001)',
+  'sponsor_251': 'Sponsor ($251)',
+  'devotee_101': 'Devotee ($101)',
+  'grand_patron': 'Grand Patron',
+  'patron': 'Patron',
+  'sponsor': 'Sponsor',
+  'devotee': 'Devotee',
+  'koozh': 'Koozh ($25)',
+  'life_koozh': 'Life Koozh ($25)',
+  'monthly': 'Monthly ($31)',
+  'vaahanam': 'Vaahanam ($501)',
+};
+
+const formatDonationType = (type) => {
+  if (!type) return 'General Donation';
+  const lowercaseType = type.toLowerCase().trim();
+  if (DONATION_TYPE_MAP[lowercaseType]) {
+    return DONATION_TYPE_MAP[lowercaseType];
+  }
+  
+  // Auto-format any types ending in a number (e.g. general_50) to include a dollar sign
+  const numSuffixMatch = type.match(/^(.*)_(\d+)$/);
+  if (numSuffixMatch) {
+    const namePart = numSuffixMatch[1].replace(/[_-]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+    const amountPart = numSuffixMatch[2];
+    return `${namePart} ($${Number(amountPart).toLocaleString()})`;
+  }
+
+  return type
+    .replace(/[_-]/g, ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+};
 
 const DonationsPage = () => {
   const [rows, setRows] = useState([])
@@ -152,55 +186,7 @@ const DonationsPage = () => {
     fetchDonations()
   }, [page, pageSize, startDate, endDate, donationType, dateRangePreset])
 
-  const handleSendPaymentLink = (id) => {
-    setDialogConfig({
-      type: 'prompt',
-      title: 'Send Payment Link',
-      message: 'Enter Razorpay / Payment Link (Optional):',
-      defaultValue: 'https://rzp.io/l/donation',
-      onConfirm: async (link) => {
-        try {
-          const res = await templeClient.post(`/admin/donations-pledges/${id}/send-payment-link`, {
-            paymentLink: link
-          })
-          if (res.data?.success) {
-            showToast("Payment link sent successfully via WhatsApp!")
-          } else {
-            showToast("Failed to send payment link.", "error")
-          }
-        } catch (err) {
-          console.error(err)
-          showToast("Error sending payment link.", "error")
-        }
-      }
-    })
-  }
-
-  const handleMarkAsPaid = (id) => {
-    setDialogConfig({
-      type: 'confirm',
-      title: 'Mark as Paid',
-      message: 'Are you sure you want to mark this donation as completed/paid?',
-      onConfirm: async () => {
-        try {
-          const res = await templeClient.patch(`/admin/donations-pledges/${id}`, {
-            status: 'COMPLETED'
-          })
-          if (res.data?.success) {
-            showToast("Status updated to COMPLETED!")
-            fetchDonations() // refresh list
-          } else {
-            showToast("Failed to update status.", "error")
-          }
-        } catch (err) {
-          console.error(err)
-          showToast("Error updating status.", "error")
-        }
-      }
-    })
-  }
-
-  // Updated Column Order: Name -> Donation Detail -> Date -> Time -> Mobile -> Status -> Actions
+  // Updated Column Order: Name -> Donation Detail -> Date -> Time -> Mobile -> Status
   const columns = [
     { key: 'name', label: 'Donor Name', defaultWidth: 150 },
     { key: 'type_of_donation', label: 'Donation Detail', defaultWidth: 200 },
@@ -222,37 +208,6 @@ const DonationsPage = () => {
           {row.status || 'PENDING'}
         </span>
       )
-    },
-    {
-      key: 'actions',
-      label: 'Actions',
-      defaultWidth: 220,
-      render: (row) => {
-        const isCompleted = (row.status || 'PENDING') === 'COMPLETED';
-        if (isCompleted) {
-          return (
-            <span className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-green-700 bg-green-50 border border-green-200 rounded-lg select-none cursor-default">
-              Payment Paid ✓
-            </span>
-          );
-        }
-        return (
-          <div className="flex gap-2">
-            <button
-              onClick={() => handleSendPaymentLink(row.id)}
-              className="px-2.5 py-1.5 bg-primary text-white text-[10px] font-bold rounded-lg hover:bg-primary-dark transition-all"
-            >
-              Send Pay Link
-            </button>
-            <button
-              onClick={() => handleMarkAsPaid(row.id)}
-              className="px-2.5 py-1.5 bg-green-600 text-white text-[10px] font-bold rounded-lg hover:bg-green-700 transition-all"
-            >
-              Mark Paid
-            </button>
-          </div>
-        );
-      }
     }
   ]
 
@@ -261,7 +216,7 @@ const DonationsPage = () => {
     return {
       ...row,
       name: row.name || 'Anonymous Donor',
-      type_of_donation: row.type_of_donation || 'General Donation',
+      type_of_donation: formatDonationType(row.type_of_donation),
       date: d.toLocaleDateString(),
       time: d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
@@ -414,7 +369,7 @@ const DonationsPage = () => {
                 >
                   <option value="">All Types</option>
                   {availableTypes.map(t => (
-                    <option key={t} value={t}>{t}</option>
+                    <option key={t} value={t}>{formatDonationType(t)}</option>
                   ))}
                 </select>
               </div>

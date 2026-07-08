@@ -4,7 +4,7 @@
 
 /* ── Global ───────────────────────────────────────────── */
 * { font-family: 'Nunito', sans-serif; }
-body { background: #eef0f8; min-height: 100vh; margin: 0; }
+body { background: #ffffff; min-height: 100vh; margin: 0; }
 #root { min-height: 100vh; }
 
 /* ── Scanner laser beam ───────────────────────────────── */

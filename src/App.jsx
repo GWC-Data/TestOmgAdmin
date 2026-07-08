@@ -101,7 +101,7 @@ export default function App() {
 
 
   return (
-    <div className="font-nunito min-h-screen bg-[#eef0f8] flex flex-col relative">
+    <div className="font-nunito min-h-screen bg-white flex flex-col relative">
       <TopNav active={activeTab} onChange={setActiveTab} />
 
       <main className="flex-1 pb-20 md:pb-0 overflow-y-auto">
